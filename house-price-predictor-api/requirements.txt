@@ -6,5 +6,6 @@ fastapi
 pydantic
 uvicorn
 flask
+gunicorn
 
 

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>House Price Predictor</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>🏡 House Price Predictor</h1>
+        <p>Enter the details below to predict the house price.</p>
+
+        <form id="price-form">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="medinc">Median Income (in $10k)</label>
+                    <input type="number" step="any" id="medinc" required>
+                </div>
+                <div class="form-group">
+                    <label for="houseage">House Age</label>
+                    <input type="number" step="any" id="houseage" required>
+                </div>
+                <div class="form-group">
+                    <label for="averooms">Average Rooms</label>
+                    <input type="number" step="any" id="averooms" required>
+                </div>
+                <div class="form-group">
+                    <label for="avebedrms">Average Bedrooms</label>
+                    <input type="number" step="any" id="avebedrms" required>
+                </div>
+                <div class="form-group">
+                    <label for="population">Population</label>
+                    <input type="number" step="any" id="population" required>
+                </div>
+                <div class="form-group">
+                    <label for="aveoccup">Average Occupancy</label>
+                    <input type="number" step="any" id="aveoccup" required>
+                </div>
+                <div class="form-group">
+                    <label for="latitude">Latitude</label>
+                    <input type="number" step="any" id="latitude" required>
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude</label>
+                    <input type="number" step="any" id="longitude" required>
+                </div>
+            </div>
+            
+            <button type="submit">Predict Price</button>
+        </form>
+
+        <div id="result-container">
+            <h3>Predicted Price: <span id="prediction-result">...</span></h3>
+        </div>
+    </div>
+
+    <script>
+        // Wait for the document to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('price-form');
+            const resultSpan = document.getElementById('prediction-result');
+
+            // Add an event listener for the form submission
+            form.addEventListener('submit', async (e) => {
+                // Prevent the form from submitting the traditional way
+                e.preventDefault();
+
+                // 1. Get data from the form
+                const formData = {
+                    MedInc: parseFloat(document.getElementById('medinc').value),
+                    HouseAge: parseFloat(document.getElementById('houseage').value),
+                    AveRooms: parseFloat(document.getElementById('averooms').value),
+                    AveBedrms: parseFloat(document.getElementById('avebedrms').value),
+                    Population: parseFloat(document.getElementById('population').value),
+                    AveOccup: parseFloat(document.getElementById('aveoccup').value),
+                    Latitude: parseFloat(document.getElementById('latitude').value),
+                    Longitude: parseFloat(document.getElementById('longitude').value)
+                };
+
+                // 2. Send data to the /predict API endpoint
+                try {
+                    const response = await fetch('/predict', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    });
+
+                    // 3. Get the JSON response
+                    const result = await response.json();
+
+                    // 4. Display the result
+                    if (result.predicted_price !== undefined) {
+                        // Format the price nicely
+                        const formattedPrice = (result.predicted_price * 100000).toLocaleString('en-US', {
+                            style: 'currency',
+                            currency: 'USD'
+                        });
+                        resultSpan.textContent = `${formattedPrice}`;
+                    } else {
+                        resultSpan.textContent = 'Error: Invalid response from server.';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    resultSpan.textContent = 'An error occurred. Check console.';
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
